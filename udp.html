@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>udp.ino | Arduino IDE 2.3.7</title>
+  <style>
+    :root{
+      --titlebar:#f3efe9;
+      --menubar:#ffffff;
+      --toolbar:#0a7b7b;
+      --sidebar:#edf2f2;
+      --sidebar-border:#d6dddd;
+      --tabbar:#eef2f2;
+      --editor-bg:#ffffff;
+      --editor-line:#1b82aa;
+      --editor-text:#455a64;
+      --editor-comment:#8aa0a0;
+      --editor-key:#0a8db7;
+      --editor-pre:#b45d1f;
+      --editor-string:#a05a2c;
+      --status:#0a7b7b;
+      --border:#dde4e4;
+      --icon:#9aabb0;
+      --icon-hover:#74868d;
+      --win-hover:#e6e1db;
+      --win-close:#e81123;
+    }
+
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
+
+    html,body{
+      width:100%;
+      height:100%;
+      overflow:hidden;
+      background:#cfcfcf;
+      font-family:"Segoe UI", Tahoma, Arial, sans-serif;
+      user-select:none;
+    }
+
+    .window{
+      width:100vw;
+      height:100vh;
+      display:flex;
+      flex-direction:column;
+      background:#fff;
+      overflow:hidden;
+    }
+
+    /* TITLE BAR */
+    .titlebar{
+      height:32px;
+      background:var(--titlebar);
+      border-bottom:1px solid #ddd7d1;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding-left:8px;
+      flex-shrink:0;
+    }
+
+    .title-left{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      min-width:0;
+    }
+
+    .arduino-app-icon{
+      width:18px;
+      height:18px;
+      border-radius:4px;
+      background:#0b8a8a;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-shrink:0;
+    }
+
+    .arduino-app-icon svg{
+      width:12px;
+      height:12px;
+      display:block;
+    }
+
+    .window-title{
+      font-size:13px;
+      color:#232323;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .window-controls{
+      height:100%;
+      display:flex;
+      align-items:stretch;
+      flex-shrink:0;
+    }
+
+    .win-btn{
+      width:46px;
+      height:100%;
+      border:none;
+      background:transparent;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      color:#333;
+    }
+
+    .win-btn:hover{ background:var(--win-hover); }
+    .win-btn.close:hover{ background:var(--win-close); color:#fff; }
+
+    .win-btn svg{
+      width:10px;
+      height:10px;
+      display:block;
+    }
+
+    /* MENU BAR */
+    .menubar{
+      height:22px;
+      background:var(--menubar);
+      display:flex;
+      align-items:center;
+      gap:18px;
+      padding:0 6px;
+      border-bottom:1px solid #e8ecec;
+      flex-shrink:0;
+    }
+
+    .menu-item{
+      font-size:13px;
+      color:#222;
+      padding:2px 2px;
+      cursor:pointer;
+      border-radius:2px;
+    }
+
+    .menu-item:hover{
+      background:#f1f3f3;
+    }
+
+    /* TOOLBAR */
+    .toolbar{
+      height:46px;
+      background:var(--toolbar);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 12px;
+      flex-shrink:0;
+    }
+
+    .toolbar-left{
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .toolbar-btn{
+      width:30px;
+      height:30px;
+      border-radius:50%;
+      border:none;
+      background:rgba(255,255,255,0.16);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      padding:0;
+    }
+
+    .toolbar-btn:hover{
+      background:rgba(255,255,255,0.25);
+    }
+
+    .toolbar-btn svg{
+      width:17px;
+      height:17px;
+      stroke:#d9f0f0;
+      fill:none;
+      stroke-width:2;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+
+    .board-select{
+      margin-left:8px;
+      width:255px;
+      height:32px;
+      background:#f6f9f9;
+      border:1px solid #d2dcdc;
+      border-radius:2px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 12px;
+      color:#475d5d;
+      font-size:14px;
+    }
+
+    .board-select .arrow svg{
+      width:11px;
+      height:11px;
+      stroke:#5d7070;
+      fill:none;
+      stroke-width:2;
+    }
+
+    .toolbar-right{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .toolbar-icon-btn{
+      width:26px;
+      height:26px;
+      border:none;
+      background:transparent;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      padding:0;
+    }
+
+    .toolbar-icon-btn svg{
+      width:18px;
+      height:18px;
+      stroke:#d8efef;
+      fill:none;
+      stroke-width:2;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+
+    /* MAIN */
+    .main{
+      flex:1;
+      display:flex;
+      min-height:0;
+      background:#fff;
+    }
+
+    /* SIDEBAR */
+    .sidebar{
+      width:52px;
+      background:var(--sidebar);
+      border-right:1px solid var(--sidebar-border);
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      align-items:center;
+      padding:12px 0 10px;
+      flex-shrink:0;
+    }
+
+    .sidebar-top,
+    .sidebar-bottom{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:16px;
+      width:100%;
+    }
+
+    .side-btn{
+      width:100%;
+      height:36px;
+      border:none;
+      background:transparent;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      position:relative;
+      padding:0;
+    }
+
+    .side-btn:hover{
+      background:rgba(0,0,0,0.03);
+    }
+
+    .side-btn.active::before{
+      content:"";
+      position:absolute;
+      left:0;
+      top:5px;
+      bottom:5px;
+      width:3px;
+      background:#0a7b7b;
+      border-radius:0 2px 2px 0;
+    }
+
+    .side-btn svg{
+      width:24px;
+      height:24px;
+      stroke:var(--icon);
+      fill:none;
+      stroke-width:1.8;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+
+    .side-btn:hover svg{
+      stroke:var(--icon-hover);
+    }
+
+    /* WORKSPACE */
+    .workspace{
+      flex:1;
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      background:#fff;
+    }
+
+    .tabbar{
+      height:34px;
+      background:var(--tabbar);
+      border-bottom:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 8px;
+      flex-shrink:0;
+    }
+
+    .tab-file{
+      font-size:14px;
+      color:#445454;
+      white-space:nowrap;
+    }
+
+    .tab-right svg{
+      width:14px;
+      height:14px;
+      stroke:#667;
+      fill:none;
+      stroke-width:2;
+    }
+
+    /* EDITOR */
+    .editor{
+      flex:1;
+      min-height:0;
+      display:flex;
+      background:var(--editor-bg);
+      overflow:hidden;
+      font-family: Consolas, "Courier New", monospace;
+    }
+
+    .line-numbers{
+      width:60px;
+      flex-shrink:0;
+      padding-top:8px;
+      padding-right:16px;
+      text-align:right;
+      font-size:14px;
+      line-height:26px;
+      color:var(--editor-line);
+      background:#fff;
+      user-select:none;
+      overflow:hidden;
+      white-space:pre;
+    }
+
+    .code-pane{
+      flex:1;
+      min-width:0;
+      padding-top:8px;
+      padding-left:14px;
+      padding-right:20px;
+      font-size:14px;
+      line-height:26px;
+      color:var(--editor-text);
+      white-space:pre;
+      overflow:auto;
+      user-select:text;
+    }
+
+    .code-pane::-webkit-scrollbar{
+      width:10px;
+      height:10px;
+    }
+
+    .code-pane::-webkit-scrollbar-thumb{
+      background:#c8d4d4;
+      border-radius:8px;
+    }
+
+    .code-pane::-webkit-scrollbar-track{
+      background:#f4f7f7;
+    }
+
+    .kw{ color:var(--editor-key); }
+    .pre{ color:var(--editor-pre); }
+    .str{ color:var(--editor-string); }
+    .comment{ color:var(--editor-comment); }
+
+    .editor::after{
+      content:"";
+      width:8px;
+      border-left:1px solid #f0f2f2;
+      background:#fff;
+      flex-shrink:0;
+    }
+
+    /* STATUS BAR */
+    .statusbar{
+      height:24px;
+      background:var(--status);
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:14px;
+      padding:0 10px;
+      color:#ffffff;
+      font-size:12px;
+      flex-shrink:0;
+    }
+
+    .status-item{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      white-space:nowrap;
+    }
+
+    .status-icon svg{
+      width:13px;
+      height:13px;
+      stroke:#ffffff;
+      fill:none;
+      stroke-width:2;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+  </style>
+</head>
+<body>
+  <div class="window">
+    <!-- TITLE BAR -->
+    <div class="titlebar">
+      <div class="title-left">
+        <div class="arduino-app-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M5 12c0-2 1.5-3.5 3.5-3.5S12 10 12 12s-1.5 3.5-3.5 3.5S5 14 5 12Z" fill="none" stroke="#fff" stroke-width="1.8"/>
+            <path d="M12 12c0-2 1.5-3.5 3.5-3.5S19 10 19 12s-1.5 3.5-3.5 3.5S12 14 12 12Z" fill="none" stroke="#fff" stroke-width="1.8"/>
+            <path d="M7.4 12h2.3M15.1 10.8v2.4M13.9 12h2.4" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="window-title">udp.ino | Arduino IDE 2.3.7</div>
+      </div>
+
+      <div class="window-controls">
+        <button class="win-btn" type="button">
+          <svg viewBox="0 0 10 10"><path d="M1 5h8" stroke="currentColor" stroke-width="1.2"/></svg>
+        </button>
+        <button class="win-btn" type="button">
+          <svg viewBox="0 0 10 10"><rect x="1.5" y="1.5" width="7" height="7" stroke="currentColor" fill="none" stroke-width="1.1"/></svg>
+        </button>
+        <button class="win-btn close" type="button">
+          <svg viewBox="0 0 10 10"><path d="M2 2l6 6M8 2L2 8" stroke="currentColor" stroke-width="1.2"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- MENU BAR -->
+    <div class="menubar">
+      <div class="menu-item" onclick="window.location.href='file.html'">File</div>
+      <div class="menu-item">Edit</div>
+      <div class="menu-item">Sketch</div>
+      <div class="menu-item">Tools</div>
+      <div class="menu-item">Help</div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <button class="toolbar-btn" type="button">
+          <svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"></path></svg>
+        </button>
+        <button class="toolbar-btn" type="button">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 16V6"></path>
+            <path d="M8 10l4-4 4 4"></path>
+            <path d="M5 18h14"></path>
+          </svg>
+        </button>
+        <button class="toolbar-btn" type="button">
+          <svg viewBox="0 0 24 24">
+            <path d="M8 7l8 5-8 5V7z"></path>
+            <path d="M5 5l2 2M17 17l2 2M19 5l-2 2M5 19l2-2"></path>
+          </svg>
+        </button>
+
+        <div class="board-select">
+          <span>Select Board</span>
+          <span class="arrow">
+            <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
+          </span>
+        </div>
+      </div>
+
+      <div class="toolbar-right">
+        <button class="toolbar-icon-btn" type="button">
+          <svg viewBox="0 0 24 24"><path d="M3 13h4l2-7 4 12 2-7h6"></path></svg>
+        </button>
+        <button class="toolbar-icon-btn" type="button">
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1L7 17M17 7l2.1-2.1"></path>
+          </svg>
+        </button>
+        <button class="toolbar-icon-btn" type="button">
+          <svg viewBox="0 0 24 24">
+            <circle cx="5" cy="12" r="1.2" fill="#d8efef" stroke="none"></circle>
+            <circle cx="12" cy="12" r="1.2" fill="#d8efef" stroke="none"></circle>
+            <circle cx="19" cy="12" r="1.2" fill="#d8efef" stroke="none"></circle>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+      <!-- SIDEBAR -->
+      <aside class="sidebar">
+        <div class="sidebar-top">
+          <button class="side-btn active" onclick="window.location.href='file.html'">
+            <svg viewBox="0 0 24 24">
+              <path d="M3 7h6l2 2h10v8a2 2 0 0 1-2 2H3z"></path>
+              <path d="M3 7v10"></path>
+            </svg>
+          </button>
+
+          <button class="side-btn" type="button">
+            <svg viewBox="0 0 24 24">
+              <rect x="5" y="7" width="14" height="10" rx="1"></rect>
+              <path d="M9 4v3M15 4v3M9 17v3M15 17v3M3 10h2M3 14h2M19 10h2M19 14h2"></path>
+            </svg>
+          </button>
+
+          <button class="side-btn" type="button">
+            <svg viewBox="0 0 24 24">
+              <path d="M5 4h4v16H5z"></path>
+              <path d="M10 6h4v14h-4z"></path>
+              <path d="M15 8h4v12h-4z"></path>
+            </svg>
+          </button>
+
+          <button class="side-btn" type="button">
+            <svg viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="7"></circle>
+              <path d="M20 20l-4-4"></path>
+              <path d="M8 14l6-6"></path>
+            </svg>
+          </button>
+
+          <button class="side-btn" type="button">
+            <svg viewBox="0 0 24 24">
+              <circle cx="10" cy="10" r="7"></circle>
+              <path d="M15.5 15.5L21 21"></path>
+            </svg>
+          </button>
+        </div>
+
+        <div class="sidebar-bottom">
+          <button class="side-btn" type="button">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="8" r="4"></circle>
+              <path d="M4 20c1.5-4 14.5-4 16 0"></path>
+            </svg>
+          </button>
+        </div>
+      </aside>
+
+      <!-- WORKSPACE -->
+      <section class="workspace">
+        <div class="tabbar">
+          <div class="tab-file">udp.ino</div>
+          <div class="tab-right">
+            <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"></path></svg>
+          </div>
+        </div>
+
+        <div class="editor">
+          <div class="line-numbers" id="lineNumbers"></div>
+          <pre class="code-pane" id="codePane"></pre>
+        </div>
+      </section>
+    </div>
+
+    <!-- STATUS BAR -->
+    <div class="statusbar">
+      <div class="status-item">Ln 1, Col 1</div>
+      <div class="status-item">
+        <span class="status-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M8 8l8 8"></path>
+            <path d="M16 8l-8 8"></path>
+          </svg>
+        </span>
+        <span>No board selected</span>
+      </div>
+      <div class="status-item">
+        <span class="status-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 21c1.2 0 2-.8 2-2h-4c0 1.2.8 2 2 2z"></path>
+            <path d="M18 16H6l1.5-2.2V10a4.5 4.5 0 1 1 9 0v3.8L18 16z"></path>
+          </svg>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const rawCode = `#include <WiFi.h>
+#include <WiFiUdp.h>
+#include <DHT.h>
+
+const char* ssid = "AESS2.0";
+const char* password = "AESS@1111";
+
+#define DHT_PIN 4
+#define DHT_TYPE DHT11
+
+#define UDP_PORT 5000
+
+DHT dht(DHT_PIN, DHT_TYPE);
+WiFiUDP udp;
+float humidity = 0.0;
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+  }
+  Serial.println(WiFi.localIP());
+  udp.begin(UDP_PORT);
+  dht.begin();
+}
+
+void loop() {
+  int packetSize = udp.parsePacket();
+  if (packetSize) {
+    char packetData[packetSize];
+    udp.read(packetData, packetSize);
+    String request = String(packetData);
+
+    if (request == "get_humidity") {
+      humidity = dht.readHumidity();
+      udp.beginPacket(udp.remoteIP(), udp.remotePort());
+      udp.printf("Humidity: %.2f%%", humidity);
+      udp.endPacket();
+    }
+  }
+}`;
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function highlightCode(code) {
+      let escaped = escapeHtml(code);
+
+      escaped = escaped.replace(/(\/\/.*)/g, '<span class="comment">$1</span>');
+
+      escaped = escaped.replace(/(^|\n)(#include|#define)(.*)/g, function(match, p1, p2, p3){
+        return p1 + '<span class="pre">' + p2 + p3 + '</span>';
+      });
+
+      escaped = escaped.replace(/"([^"\\]|\\.)*"/g, function(m){
+        return '<span class="str">' + m + '</span>';
+      });
+
+      escaped = escaped.replace(/\b(void|char|const|float|int|while|if)\b/g, '<span class="kw">$1</span>');
+
+      return escaped;
+    }
+
+    const codePane = document.getElementById("codePane");
+    const lineNumbers = document.getElementById("lineNumbers");
+
+    const lines = rawCode.split("\n");
+    lineNumbers.textContent = lines.map((_, i) => i + 1).join("\n");
+    codePane.innerHTML = highlightCode(rawCode);
+
+    codePane.addEventListener("scroll", () => {
+      lineNumbers.scrollTop = codePane.scrollTop;
+    });
+  </script>
+</body>
+</html>
